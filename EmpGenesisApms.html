@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Request Web App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;|
+            
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error-message {
+            color: red;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Send HTTP Request</h1>
+    <form id="paymentForm">
+        <div class="form-group">
+            <label for="amount">Amount</label>
+            <input type="number" id="amount" name="amount" required>
+        </div>
+        <button type="button" onclick="sendRequest()">Deposit</button>
+    </form>
+
+    <div id="responseContainer"></div>
+
+    <script>
+        function sendRequest() {
+            const amount = document.getElementById('amount').value;
+            const url = 'http://localhost:3000/proxy';
+            const requestBody = `<?xml version="1.0" encoding="UTF-8"?>
+<payment_transaction>
+    <transaction_type>sale</transaction_type>
+    <transaction_id>${Date.now()}</transaction_id>
+    <moto>False</moto>
+    <crypto>False</crypto>
+    <remote_ip>92.247.243.134</remote_ip>
+    <amount>${amount}</amount>
+    <currency>USD</currency>
+    <card_holder>Tony Stoyánov</card_holder>
+    <card_number>4200000000000000</card_number>
+    <exp_month>12</exp_month>
+    <exp_year>2028</exp_year>
+    <cvv>123</cvv>
+    <customer_phone>5555555555</customer_phone>
+    <customer_email>tony.stoyanov@gmail.com</customer_email>
+    <billing_address>
+        <first_name>Tony</first_name>
+        <last_name>Stoyánov</last_name>
+        <address>11 Calle del Sol</address>
+        <city>Tulum</city>
+        <state>Quintana Roo</state>
+        <zip>77760</zip>
+        <country>MX</country>
+    </billing_address>
+</payment_transaction>`;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/xml'
+                },
+                body: requestBody
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Response:', data);
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(data, 'text/xml');
+                const status = xmlDoc.getElementsByTagName('status')[0]?.textContent;
+                const message = xmlDoc.getElementsByTagName('message')[0]?.textContent;
+                const technicalMessage = xmlDoc.getElementsByTagName('technical_message')[0]?.textContent;
+
+                const responseContainer = document.getElementById('responseContainer');
+                responseContainer.innerHTML = '';
+
+                if (status === 'error') {
+                    const errorMessage = document.createElement('div');
+                    errorMessage.classList.add('error-message');
+                    errorMessage.textContent = `${message} (${technicalMessage})`;
+                    responseContainer.appendChild(errorMessage);
+                } else {
+                    responseContainer.textContent = 'Transaction successful!';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error.message);
+                const responseContainer = document.getElementById('responseContainer');
+                responseContainer.innerHTML = '';
+                const errorMessage = document.createElement('div');
+                errorMessage.classList.add('error-message');
+                errorMessage.textContent = 'An error occurred while processing the request.';
+                responseContainer.appendChild(errorMessage);
+            });
+        }
+    </script>
+</body>
+</html>
