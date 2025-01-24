@@ -1,2 +1,2 @@
 # eMerchantPayGenesisApms
-This will create your HTTP request
+Use this to test eMerchanaPay's Genesis Server-to-Server API for APMs.
