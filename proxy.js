@@ -12,13 +12,26 @@ app.use(bodyParser.text({ type: 'application/xml' }));
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Token');
     next();
 });
 
 // Proxy endpoint
 app.post('/proxy', async (req, res) => {
-    const url = 'https://staging.gate.emerchantpay.net/process/d106328b40771dfc4ab0e5396ee153aec4721671';
+    const transactionTypeMatch = req.body.match(/<transaction_type>(.*?)<\/transaction_type>/);
+    const token = req.headers['x-token'];
+
+    if (!transactionTypeMatch || !token) {
+        return res.status(400).send('Invalid transaction_type or token value');
+    }
+
+    const transactionType = transactionTypeMatch[1];
+
+    console.log(`Transaction Type: ${transactionType}`); // Debugging log
+    console.log(`Token: ${token}`); // Debugging log
+
+    const url = `https://staging.gate.emerchantpay.net/process/${token}`;
+    console.log(`Request URL: ${url}`); // Debugging log
 
     // Base64 encode the credentials
     const username = '962236e0e64fc34ec5f8a47fba263d63648c4fa3';
@@ -36,8 +49,10 @@ app.post('/proxy', async (req, res) => {
         });
 
         const data = await response.text();
+        console.log(`Response: ${data}`); // Debugging log
         res.status(response.status).send(data);
     } catch (error) {
+        console.error('Error:', error.message); // Debugging log
         res.status(500).send('Error: ' + error.message);
     }
 });
