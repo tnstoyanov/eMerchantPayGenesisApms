@@ -8,11 +8,18 @@ const PORT = process.env.PORT || 3000;
 // Middleware to parse XML body
 app.use(bodyParser.text({ type: 'application/xml' }));
 
-// Allow CORS (optional if frontend and backend are on the same origin)
+// Allow CORS and handle preflight requests
 app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST');
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow all origins or specify frontend URL
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Token');
+    res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight response for 1 day
+
+    if (req.method === 'OPTIONS') {
+        // Handle preflight request
+        return res.sendStatus(200);
+    }
+
     next();
 });
 
