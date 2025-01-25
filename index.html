@@ -1,123 +1,251 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTTP Request Web App</title>
+    <title>Genesis API Tester</title>
     <style>
+        /* General Reset and Styling */
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #f8fafc, #dbeafe);
         }
-        .form-group {
-            margin-bottom: 15px;|
-            
-        label {
-            display: block;
-            margin-bottom: 5px;
+
+        .hidden {
+            display: none;
         }
-        input {
+
+        /* Container */
+        .container {
+            background: white;
             width: 100%;
-            padding: 8px;
+            max-width: 400px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        /* Logo */
+        .logo {
+            width: 200px;
+            height: auto;
+            margin: 0 auto 20px;
+        }
+
+        /* Heading */
+        h1 {
+            font-size: 1.5rem;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: #334155;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            font-size: 0.9rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
             box-sizing: border-box;
+            outline: none;
+            margin-bottom: 10px;
         }
+
+        input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
         button {
+            width: 100%;
             padding: 10px 15px;
-            background-color: #007BFF;
+            background-color: #3b82f6;
             color: white;
+            font-size: 1rem;
             border: none;
+            border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
         button:hover {
-            background-color: #0056b3;
+            background-color: #2563eb;
         }
-        .error-message {
-            color: red;
+
+        /* Response Container */
+        #responseContainer {
             margin-top: 20px;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        .error-message {
+            color: #dc2626;
         }
     </style>
 </head>
-<body>
-    <h1>Send HTTP Request</h1>
-    <form id="paymentForm">
-        <div class="form-group">
-            <label for="amount">Amount</label>
-            <input type="number" id="amount" name="amount" required>
-        </div>
-        <button type="button" onclick="sendRequest()">Deposit</button>
-    </form>
 
-    <div id="responseContainer"></div>
+<body>
+    <div class="container">
+        <!-- Centered Image -->
+        <img src="data:image/png;base64,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"
+            class="logo" alt="Logo">
+
+        <!-- Heading -->
+        <h1>eMerchantPay Genesis S2S APM API</h1>
+
+        <label for="currency" class="hidden">Currency</label>
+        <form id="paymentForm">
+            <div class="form-group">
+                <select name="apm" id="apm" title="Select APM" required>
+                    <option value="" disabled selected>Select an APM</option>
+                    <option value="p24">Przelewy24</option>
+                    <option value="ideal">iDeal</option>
+                    <option value="ppro">MyBank</option>
+                    <option value="payu">PayU</option>
+                </select>
+                <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
+                <label for="currency" class="hidden">Currency</label>
+                <select name="currency" id="currency" title="Select Currency" required>
+                    <option value="" disabled selected>Select a Currency</option>
+                    <option value="PLN">PLN</option>
+                    <option value="EUR">EUR</option>
+                    <option value="USD">USD</option>
+                </select>
+                <select name="country" id="country" title="Select Country">
+                <option value="" disabled selected>Select a Country</option>
+                <option value="PL">Poland</option>
+                <option value="NL">Netherlands</option>
+            </select>
+            </div>
+            <button type="button" onclick="sendRequest()">Deposit</button>
+        </form>
+
+        <!-- Response Container -->
+        <div id="responseContainer"></div>
+    </div>
 
     <script>
         function sendRequest() {
             const amount = document.getElementById('amount').value;
+            const apm = document.getElementById('apm').value;
             const url = 'http://localhost:3000/proxy';
+            let token;
+    
+            switch (apm) {
+                case 'p24':
+                    token = '5be62b32cd2e15acf24cf192665bf0008fd56e50';
+                    break;
+                case 'ideal':
+                    token = 'd89a60ecad13fbcc4cfb9850718bbeaf9a4d4962';
+                    break;
+                case 'ppro':
+                    token = '7edf5fdac309ef042556e12c102d62a431823627';
+                    break;
+                case 'payu':
+                    token = '23cc8b3b54f25e686ebdd7e4569c40a1dbcc8fbe';
+                    break;
+                default:
+                    alert('Invalid transaction_type value');
+                    return;
+            }
+    
+            // send the amount in cents only
             const requestBody = `<?xml version="1.0" encoding="UTF-8"?>
-<payment_transaction>
-    <transaction_type>sale</transaction_type>
-    <transaction_id>${Date.now()}</transaction_id>
-    <moto>False</moto>
-    <crypto>False</crypto>
-    <remote_ip>92.247.243.134</remote_ip>
-    <amount>${amount}</amount>
-    <currency>USD</currency>
-    <card_holder>Tony Stoyánov</card_holder>
-    <card_number>4200000000000000</card_number>
-    <exp_month>12</exp_month>
-    <exp_year>2028</exp_year>
-    <cvv>123</cvv>
-    <customer_phone>5555555555</customer_phone>
-    <customer_email>tony.stoyanov@gmail.com</customer_email>
-    <billing_address>
-        <first_name>Tony</first_name>
-        <last_name>Stoyánov</last_name>
-        <address>11 Calle del Sol</address>
-        <city>Tulum</city>
-        <state>Quintana Roo</state>
-        <zip>77760</zip>
-        <country>MX</country>
-    </billing_address>
-</payment_transaction>`;
-
+    <payment_transaction>
+        <transaction_type>${apm}</transaction_type>
+        <transaction_id>${Date.now()}</transaction_id>
+        <usage>Test</usage>
+        <remote_ip>245.253.2.12</remote_ip>
+        <return_success_url>https://tnstoyanov.wixsite.com/payment-response/success</return_success_url>
+        <return_failure_url>https://tnstoyanov.wixsite.com/payment-response/failed</return_failure_url>
+        <notification_url>https://eopwlgjy7wi0e4b.m.pipedream.net</notification_url>
+        <amount>${amount * 100}</amount>
+        <currency>${document.getElementById('currency').value}</currency>
+        <customer_email>tony.stoyanov@tiebreak.dev</customer_email>
+        <customer_phone>+359888123456</customer_phone>
+        <payment_transaction>bank_code</payment_transaction>
+        <billing_address>
+            <first_name>Tony</first_name>
+            <last_name>Stoyanov</last_name>
+            <address1>11 Test St</address1>
+            <zip_code>10010</zip_code>
+            <city>New City</city>
+            <neighborhood></neighborhood>
+            <state></state>
+            <country>${document.getElementById('country').value}</country>
+        </billing_address>
+    </payment_transaction>`;
+    
+            console.log(`Transaction Type: ${apm}`); // Debugging log
+    
             fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/xml'
+                    'Content-Type': 'application/xml',
+                    'X-Token': token // Send the token as a custom header
                 },
                 body: requestBody
             })
-            .then(response => response.text())
-            .then(data => {
-                console.log('Response:', data);
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(data, 'text/xml');
-                const status = xmlDoc.getElementsByTagName('status')[0]?.textContent;
-                const message = xmlDoc.getElementsByTagName('message')[0]?.textContent;
-                const technicalMessage = xmlDoc.getElementsByTagName('technical_message')[0]?.textContent;
-
-                const responseContainer = document.getElementById('responseContainer');
-                responseContainer.innerHTML = '';
-
-                if (status === 'error') {
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Response:', data);
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data, 'text/xml');
+                    const status = xmlDoc.getElementsByTagName('status')[0]?.textContent;
+                    const message = xmlDoc.getElementsByTagName('message')[0]?.textContent;
+                    const technicalMessage = xmlDoc.getElementsByTagName('technical_message')[0]?.textContent;
+                    const redirectUrl = xmlDoc.getElementsByTagName('redirect_url')[0]?.textContent;
+    
+                    const responseContainer = document.getElementById('responseContainer');
+                    responseContainer.innerHTML = '';
+    
+                    if (redirectUrl) {
+                        alert('You will be redirected to a new tab for further processing.');
+                        window.open(redirectUrl, '_blank');
+                    }
+    
+                    if (status === 'error') {
+                        const errorMessage = document.createElement('div');
+                        errorMessage.classList.add('error-message');
+                        errorMessage.textContent = `${message} (${technicalMessage})`;
+                        responseContainer.appendChild(errorMessage);
+                    } else {
+                        responseContainer.textContent = 'Transaction successful!';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error.message);
+                    const responseContainer = document.getElementById('responseContainer');
+                    responseContainer.innerHTML = '';
                     const errorMessage = document.createElement('div');
                     errorMessage.classList.add('error-message');
-                    errorMessage.textContent = `${message} (${technicalMessage})`;
+                    errorMessage.textContent = 'An error occurred while processing the request.';
                     responseContainer.appendChild(errorMessage);
-                } else {
-                    responseContainer.textContent = 'Transaction successful!';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error.message);
-                const responseContainer = document.getElementById('responseContainer');
-                responseContainer.innerHTML = '';
-                const errorMessage = document.createElement('div');
-                errorMessage.classList.add('error-message');
-                errorMessage.textContent = 'An error occurred while processing the request.';
-                responseContainer.appendChild(errorMessage);
-            });
+                });
         }
     </script>
 </body>
+
 </html>
