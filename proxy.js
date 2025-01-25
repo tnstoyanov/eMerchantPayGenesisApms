@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware to parse XML body
 app.use(bodyParser.text({ type: 'application/xml' }));
