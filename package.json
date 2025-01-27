@@ -11,6 +11,18 @@
     "node-fetch": "^3.3.2"
   },
   "engines": {
-  "node": ">=16.x"
-}
+    "node": ">=16.x"
+  },
+  "description": "Use this to test eMerchantPay's Genesis Server-to-Server API for APMs.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tnstoyanov/eMerchantPayGenesisApms.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tnstoyanov/eMerchantPayGenesisApms/issues"
+  },
+  "homepage": "https://github.com/tnstoyanov/eMerchantPayGenesisApms#readme"
 }

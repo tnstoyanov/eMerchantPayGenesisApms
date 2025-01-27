@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "echo 'No build step required'",
+    "start": "vercel dev"
   },
-  "keywords": [],
+  "dependencies": {
+    "url": "^0.11.0"
+  },
+  "keywords": ["webhook", "api"],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "A simple webhook handler"
 }
